@@ -4,7 +4,7 @@ import scalariform.formatter.preferences.{SpacesAroundMultiImports, CompactContr
 
 name := "reactive-kafka"
 
-val akkaVersion = "2.3.14"
+val akkaVersion = "2.4.1"
 val akkaStreamVersion = "2.0.1"
 val kafkaVersion = "0.9.0.0"
 
@@ -59,30 +59,20 @@ testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
   .setPreference(SpacesAroundMultiImports, false))
 
 val publishSettings = Seq(
-  publishMavenStyle := true,
-  publishTo := {
-    val nexus = "https://oss.sonatype.org/"
+  publishMavenStyle := false,
+
+  publishArtifact in ThisBuild := true,
+
+  publishTo := Some {
     if (isSnapshot.value)
-      Some("snapshots" at nexus + "content/repositories/snapshots")
+      Resolver.url("Qordoba snapshots", url("http://master.qordobadev.com:8088/artifactory/qordoba-snapshots"))(Resolver.ivyStylePatterns)
     else
-      Some("releases" at nexus + "service/local/staging/deploy/maven2")
+      Resolver.url("Qordoba releases", url("http://master.qordobadev.com:8088/artifactory/qordoba-releases"))(Resolver.ivyStylePatterns)
   },
-  pomIncludeRepository := {
-    x => false
-  },
-  pomExtra := (
-    <scm>
-      <url>git@github.com:softwaremill/reactive-kafka.git</url>
-      <connection>scm:git:git@github.com:softwaremill/reactive-kafka.git</connection>
-    </scm>
-      <developers>
-        <developer>
-          <id>kciesielski</id>
-          <name>Krzysztof Ciesielski</name>
-          <url>https://twitter.com/kpciesielski</url>
-        </developer>
-      </developers>
-    ))
+
+  credentials += Credentials(Path.userHome / ".ivy2" / ".qordobaArtifactoryDeployerCredentials")
+)
+
 
 lazy val root =
   project.in( file(".") )
